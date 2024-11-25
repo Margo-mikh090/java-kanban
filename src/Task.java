@@ -13,20 +13,15 @@ public class Task {
     }
 
     public Task(String taskName, String taskDescription, TaskStatus status) {
-        this.taskName = taskName;
-        this.taskDescription = taskDescription;
-        this.status = status;
+        this(0, taskName, taskDescription, status);
     }
 
     public Task(int id, String taskName, String taskDescription) {
-        this.id = id;
-        this.taskName = taskName;
-        this.taskDescription = taskDescription;
+        this(id, taskName, taskDescription, TaskStatus.IN_PROGRESS);
     }
 
     public Task(String taskName, String taskDescription) {
-        this.taskName = taskName;
-        this.taskDescription = taskDescription;
+        this(0, taskName, taskDescription, TaskStatus.IN_PROGRESS);
     }
 
 
@@ -42,16 +37,8 @@ public class Task {
         return taskName;
     }
 
-    public void setTaskName(String taskName) {
-        this.taskName = taskName;
-    }
-
     public String getTaskDescription() {
         return taskDescription;
-    }
-
-    public void setTaskDescription(String taskDescription) {
-        this.taskDescription = taskDescription;
     }
 
     public TaskStatus getStatus() {

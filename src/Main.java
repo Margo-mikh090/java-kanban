@@ -40,5 +40,9 @@ public class Main {
         System.out.println(writeCodeAdded);
         System.out.println(doHomeworkAdded);
 
+        taskManager.removeAllSubtasks();
+        System.out.println(doHomeworkAdded);
+        System.out.println(newMakeSoupUpdated);
+
     }
 }
