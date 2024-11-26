@@ -7,7 +7,7 @@ public class TaskManager {
     private final Map<Integer, Task> tasks = new HashMap<>();
     private final Map<Integer, Epic> epics = new HashMap<>();
     private final Map<Integer, Subtask> subtasks = new HashMap<>();
-    int nextID = 1;
+    private int nextID = 1;
 
     public Task addTask(Task task) {
         task.setId(nextID++);
@@ -88,32 +88,32 @@ public class TaskManager {
         return epics.get(id);
     }
 
-    public ArrayList<Subtask> getSubtasksByEpicID(int id) {
-        ArrayList<Subtask> subtasksInEpic = new ArrayList<>();
+    public List<Subtask> getSubtasksByEpicID(int id) {
+        List<Subtask> subtasksInEpic = new ArrayList<>();
         for (Integer subtaskID : epics.get(id).getSubtaskIDs()) {
             subtasksInEpic.add(subtasks.get(subtaskID));
         }
         return  subtasksInEpic;
     }
 
-    public ArrayList<Task> getListOfTasks() {
-        ArrayList<Task> listOfTasks = new ArrayList<>();
+    public List<Task> getListOfTasks() {
+        List<Task> listOfTasks = new ArrayList<>();
         for (Integer task : tasks.keySet()) {
             listOfTasks.add(tasks.get(task));
         }
         return listOfTasks;
     }
 
-    public ArrayList<Subtask> getListOfSubtasks() {
-        ArrayList<Subtask> listOfSubtasks = new ArrayList<>();
+    public List<Subtask> getListOfSubtasks() {
+        List<Subtask> listOfSubtasks = new ArrayList<>();
         for (Integer subtask : subtasks.keySet()) {
             listOfSubtasks.add(subtasks.get(subtask));
         }
         return listOfSubtasks;
     }
 
-    public ArrayList<Epic> getListOfEpics() {
-        ArrayList<Epic> listOfEpics = new ArrayList<>();
+    public List<Epic> getListOfEpics() {
+        List<Epic> listOfEpics = new ArrayList<>();
         for (Integer epic : epics.keySet()) {
             listOfEpics.add(epics.get(epic));
         }
