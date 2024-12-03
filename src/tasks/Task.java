@@ -1,3 +1,6 @@
+package tasks;
+import statuses.TaskStatus;
+
 public class Task {
     private int id;
     private String taskName;
@@ -64,7 +67,7 @@ public class Task {
 
     @Override
     public String toString() {
-        return "Task{" + "id=" + id +
+        return "tasks.Task{" + "id=" + id +
                 ", status=" + status +
                 ", name='" + taskName + '\'' +
                 ", description='" + taskDescription + '\'' +

@@ -1,7 +1,13 @@
+import managers.InMemoryTaskManager;
+import statuses.TaskStatus;
+import tasks.Epic;
+import tasks.Subtask;
+import tasks.Task;
+
 public class Main {
 
     public static void main(String[] args) {
-        TaskManager taskManager = new TaskManager();
+        InMemoryTaskManager taskManager = new InMemoryTaskManager();
 
         Task findJob = new Task("Найти работу", "Найти вакансии, прийти на собеседование", TaskStatus.NEW);
         Task findJobAdded = taskManager.addTask(findJob);
@@ -43,6 +49,8 @@ public class Main {
         taskManager.removeAllSubtasks();
         System.out.println(doHomeworkAdded);
         System.out.println(newMakeSoupUpdated);
+
+
 
     }
 }

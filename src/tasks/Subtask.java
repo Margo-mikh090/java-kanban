@@ -1,3 +1,6 @@
+package tasks;
+import statuses.TaskStatus;
+
 public class Subtask extends Task {
     private int epicID;
 
@@ -11,6 +14,11 @@ public class Subtask extends Task {
         this.epicID = epicID;
     }
 
+    //Конструктор для теста сабтаска
+    public Subtask(int id, String taskName, String taskDescription, TaskStatus status) {
+        super(id, taskName, taskDescription, status);
+    }
+
     public int getEpicID() {
         return epicID;
     }
@@ -21,7 +29,7 @@ public class Subtask extends Task {
 
     @Override
     public String toString() {
-        return "Subtask{" + "id=" + getId() +
+        return "tasks.Subtask{" + "id=" + getId() +
                 ", status=" + getStatus() +
                 ", name='" + getTaskName() + '\'' +
                 ", description='" + getTaskDescription() + '\'' +

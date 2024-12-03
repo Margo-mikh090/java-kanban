@@ -1,14 +1,23 @@
+package managers;
+
+import statuses.TaskStatus;
+import tasks.Epic;
+import tasks.Subtask;
+import tasks.Task;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class TaskManager {
+public class InMemoryTaskManager implements TaskManager {
     private final Map<Integer, Task> tasks = new HashMap<>();
     private final Map<Integer, Epic> epics = new HashMap<>();
     private final Map<Integer, Subtask> subtasks = new HashMap<>();
+    private final HistoryManager historyManager = Managers.getDefaultHistory();
     private int nextID = 1;
 
+    @Override
     public Task addTask(Task task) {
         task.setId(nextID++);
         tasks.put(task.getId(), task);
@@ -16,6 +25,7 @@ public class TaskManager {
         return tasks.get(task.getId());
     }
 
+    @Override
     public Epic addEpic(Epic epic) {
         epic.setId(nextID++);
         epics.put(epic.getId(), epic);
@@ -24,6 +34,7 @@ public class TaskManager {
         return epics.get(epic.getId());
     }
 
+    @Override
     public Subtask addSubtask(Subtask subtask) {
         subtask.setId(nextID++);
         subtasks.put(subtask.getId(), subtask);
@@ -37,12 +48,14 @@ public class TaskManager {
         return subtasks.get(subtask.getId());
     }
 
+    @Override
     public Task updateTask(Task task) {
         tasks.put(task.getId(), task);
 
         return tasks.get(task.getId());
     }
 
+    @Override
     public Subtask updateSubtask(Subtask subtask) {
         subtasks.put(subtask.getId(), subtask);
         Epic epic = epics.get(subtask.getEpicID());
@@ -51,17 +64,19 @@ public class TaskManager {
         return subtasks.get(subtask.getId());
     }
 
+    @Override
     public Epic updateEpic(Epic epic) {
-        epics.put(epic.getId(), epic); //меняется описание и название
-        updateEpicStatus(epic.getId()); //так как заходит новый объект, который заменит старый, и только менеджер
-                                        //присваивает статус эпику, то мы присваиваем статус подмененному эпику
+        epics.put(epic.getId(), epic);
+        updateEpicStatus(epic.getId());
         return epics.get(epic.getId());
     }
 
+    @Override
     public void removeTask(int id) {
         tasks.remove(id);
     }
 
+    @Override
     public void removeSubtask(int id) {
         Subtask removedSubtask = subtasks.remove(id);
         Epic epic = epics.get(removedSubtask.getEpicID());
@@ -69,6 +84,7 @@ public class TaskManager {
         updateEpicStatus(epic.getId());
     }
 
+    @Override
     public void removeEpic(int id) {
         for (Integer subtaskID : epics.get(id).getSubtaskIDs()) {
             subtasks.remove(subtaskID);
@@ -76,18 +92,26 @@ public class TaskManager {
         epics.remove(id);
     }
 
+    @Override
     public Task getTask(int id) {
+
+        historyManager.add(tasks.get(id));
         return tasks.get(id);
     }
 
+    @Override
     public Subtask getSubtask(int id) {
+        historyManager.add(subtasks.get(id));
         return subtasks.get(id);
     }
 
+    @Override
     public Epic getEpic(int id) {
+        historyManager.add(epics.get(id));
         return epics.get(id);
     }
 
+    @Override
     public List<Subtask> getSubtasksByEpicID(int id) {
         List<Subtask> subtasksInEpic = new ArrayList<>();
         for (Integer subtaskID : epics.get(id).getSubtaskIDs()) {
@@ -96,6 +120,7 @@ public class TaskManager {
         return  subtasksInEpic;
     }
 
+    @Override
     public List<Task> getListOfTasks() {
         List<Task> listOfTasks = new ArrayList<>();
         for (Integer task : tasks.keySet()) {
@@ -104,6 +129,7 @@ public class TaskManager {
         return listOfTasks;
     }
 
+    @Override
     public List<Subtask> getListOfSubtasks() {
         List<Subtask> listOfSubtasks = new ArrayList<>();
         for (Integer subtask : subtasks.keySet()) {
@@ -112,6 +138,7 @@ public class TaskManager {
         return listOfSubtasks;
     }
 
+    @Override
     public List<Epic> getListOfEpics() {
         List<Epic> listOfEpics = new ArrayList<>();
         for (Integer epic : epics.keySet()) {
@@ -120,11 +147,13 @@ public class TaskManager {
         return listOfEpics;
     }
 
+    @Override
     public void removeAllTasks() {
         tasks.clear();
     }
 
-    public  void removeAllSubtasks() {
+    @Override
+    public void removeAllSubtasks() {
         subtasks.clear();
         for (Epic epic : epics.values()) {
             epic.clearSubtasks();
@@ -132,9 +161,15 @@ public class TaskManager {
         }
     }
 
-    public  void removeAllEpics() {
+    @Override
+    public void removeAllEpics() {
         subtasks.clear();
         epics.clear();
+    }
+
+    @Override
+    public List<Task> getHistory() {
+        return historyManager.getHistory();
     }
 
     private void updateEpicStatus(int epicID) {

@@ -1,7 +1,11 @@
+package tasks;
+
+import statuses.TaskStatus;
+
 import java.util.ArrayList;
 import java.util.List;
 
-public class Epic extends Task{
+public class Epic extends Task {
     private List<Integer> subtaskIDs = new ArrayList<>();
 
     public Epic(int id, String taskName, String taskDescription, List<Integer> subtaskIDs) {
@@ -11,6 +15,11 @@ public class Epic extends Task{
 
     public Epic(String taskName, String taskDescription) {
         super(taskName, taskDescription);
+    }
+
+    //Конструктор для теста эпика
+    public Epic(int id, String taskName, String taskDescription, TaskStatus status) {
+        super(id, taskName, taskDescription, status);
     }
 
     public void removeSubtask(int id){
@@ -31,7 +40,7 @@ public class Epic extends Task{
 
     @Override
     public String toString() {
-        return "Epic{" + "id=" + getId() +
+        return "tasks.Epic{" + "id=" + getId() +
                 ", status=" + getStatus() +
                 ", name='" + getTaskName() + '\'' +
                 ", description='" + getTaskDescription() + '\'' +
