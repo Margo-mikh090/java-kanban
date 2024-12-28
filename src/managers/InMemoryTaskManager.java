@@ -217,7 +217,7 @@ public class InMemoryTaskManager implements TaskManager {
             }
         }
 
-        if (countSubtasksNEW == countAllSubtasks || countAllSubtasks== 0) {
+        if (countSubtasksNEW == countAllSubtasks || countAllSubtasks == 0) {
             Epic epic = epics.get(epicID);
             epic.setStatus(TaskStatus.NEW);
             epics.put(epicID, epic);
