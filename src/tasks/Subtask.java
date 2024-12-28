@@ -23,10 +23,6 @@ public class Subtask extends Task {
         return epicID;
     }
 
-    public void setEpicID(int epicID) {
-        this.epicID = epicID;
-    }
-
     @Override
     public String toString() {
         return "tasks.Subtask{" + "id=" + getId() +
