@@ -75,6 +75,9 @@ public class InMemoryHistoryManager implements HistoryManager {
 
     @Override
     public void remove(int id) {
-        removeNode(viewedTasks.get(id));
+        if (viewedTasks.get(id) != null && getHistory().contains(viewedTasks.get(id).getItem())) {
+            removeNode(viewedTasks.get(id));
+        }
+
     }
 }
