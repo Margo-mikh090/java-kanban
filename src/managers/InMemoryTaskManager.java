@@ -73,11 +73,13 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void removeTask(int id) {
+        historyManager.remove(id);
         tasks.remove(id);
     }
 
     @Override
     public void removeSubtask(int id) {
+        historyManager.remove(id);
         Subtask removedSubtask = subtasks.remove(id);
         Epic epic = epics.get(removedSubtask.getEpicID());
         epic.removeSubtask(id);
@@ -87,8 +89,10 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void removeEpic(int id) {
         for (Integer subtaskID : epics.get(id).getSubtaskIDs()) {
+            historyManager.remove(subtaskID);
             subtasks.remove(subtaskID);
         }
+        historyManager.remove(id);
         epics.remove(id);
     }
 
@@ -149,11 +153,17 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void removeAllTasks() {
+        for (Task task : tasks.values()) {
+                historyManager.remove(task.getId());
+        }
         tasks.clear();
     }
 
     @Override
     public void removeAllSubtasks() {
+        for (Subtask subtask : subtasks.values()) {
+            historyManager.remove(subtask.getId());
+        }
         subtasks.clear();
         for (Epic epic : epics.values()) {
             epic.clearSubtasks();
@@ -163,7 +173,13 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void removeAllEpics() {
+        for (Subtask subtask : subtasks.values()) {
+            historyManager.remove(subtask.getId());
+        }
         subtasks.clear();
+        for (Epic epic : epics.values()) {
+            historyManager.remove(epic.getId());
+        }
         epics.clear();
     }
 
@@ -185,7 +201,7 @@ public class InMemoryTaskManager implements TaskManager {
             }
         }
 
-        if (countSubtasksNEW == countAllSubtasks || countAllSubtasks== 0) {
+        if (countSubtasksNEW == countAllSubtasks || countAllSubtasks == 0) {
             Epic epic = epics.get(epicID);
             epic.setStatus(TaskStatus.NEW);
             epics.put(epicID, epic);

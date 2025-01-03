@@ -3,8 +3,8 @@ import statuses.TaskStatus;
 
 public class Task {
     private int id;
-    private String taskName;
-    private String taskDescription;
+    private final String taskName;
+    private final String taskDescription;
     private TaskStatus status;
 
 
