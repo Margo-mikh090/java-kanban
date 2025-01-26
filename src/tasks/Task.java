@@ -2,7 +2,7 @@ package tasks;
 import enums.TaskStatus;
 import enums.TaskType;
 
-public class Task extends AbstractTask{
+public class Task extends AbstractTask {
     public Task(int id, String taskName, String taskDescription, TaskStatus status) {
         super(id, taskName, taskDescription, status);
     }
