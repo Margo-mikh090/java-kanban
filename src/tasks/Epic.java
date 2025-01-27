@@ -6,7 +6,7 @@ import enums.TaskType;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Epic extends AbstractTask {
+public class Epic extends Task {
     private List<Integer> subtaskIDs = new ArrayList<>();
 
     public Epic(int id, String taskName, String taskDescription, List<Integer> subtaskIDs) {

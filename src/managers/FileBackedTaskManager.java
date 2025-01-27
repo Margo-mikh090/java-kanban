@@ -3,13 +3,11 @@ package managers;
 import enums.TaskStatus;
 import enums.TaskType;
 import exceptions.ManagerSaveException;
-import tasks.AbstractTask;
+import tasks.Task;
 import tasks.Epic;
 import tasks.Subtask;
-import tasks.Task;
 
 import java.io.*;
-import java.util.Optional;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
     private final File file;
@@ -24,18 +22,18 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         return fileBackedTaskManager;
     }
 
-    private static Optional<AbstractTask> fromString(String value) {
+    private static Task fromString(String value) {
         String[] taskData = value.split(",");
         TaskType taskType = TaskType.valueOf(taskData[1]);
+        int id = Integer.parseInt(taskData[0]);
 
         return switch (taskType) {
-            case TASK -> Optional.of(new Task(Integer.parseInt(taskData[0]), taskData[2],
-                    taskData[4], TaskStatus.valueOf(taskData[3])));
-            case EPIC -> Optional.of(new Epic(Integer.parseInt(taskData[0]), taskData[2],
-                    taskData[4], TaskStatus.valueOf(taskData[3])));
-            case SUBTASK -> Optional.of(new Subtask(Integer.parseInt(taskData[0]), taskData[2],
-                    taskData[4], TaskStatus.valueOf(taskData[3]), Integer.parseInt(taskData[5])));
-            default -> Optional.empty();
+            case TASK -> new Task(id, taskData[2],
+                    taskData[4], TaskStatus.valueOf(taskData[3]));
+            case EPIC -> new Epic(id, taskData[2],
+                    taskData[4], TaskStatus.valueOf(taskData[3]));
+            case SUBTASK -> new Subtask(id, taskData[2],
+                    taskData[4], TaskStatus.valueOf(taskData[3]), Integer.parseInt(taskData[5]));
         };
     }
 
@@ -45,19 +43,12 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             br.readLine();
             while (br.ready()) {
                 line  = br.readLine();
-                if (fromString(line).isPresent()) {
-                    AbstractTask task = fromString(line).get();
-                    switch (task.getType()) {
-                        case TASK:
-                            storage.getTasksMap().put(task.getId(), (Task) task);
-                            break;
-                        case EPIC:
-                            storage.getEpicsMap().put(task.getId(), (Epic) task);
-                            break;
-                        case SUBTASK:
-                            storage.getSubtasksMap().put(task.getId(), (Subtask) task);
-                            break;
-                    }
+                Task task = fromString(line);
+
+                switch (task.getType()) {
+                    case TASK -> tasks.put(task.getId(), task);
+                    case EPIC -> epics.put(task.getId(), (Epic) task);
+                    case SUBTASK -> subtasks.put(task.getId(), (Subtask) task);
                 }
             }
         } catch (IOException e) {

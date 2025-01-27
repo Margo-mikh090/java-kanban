@@ -1,6 +1,5 @@
 package managers;
 
-import tasks.AbstractTask;
 import tasks.Epic;
 import tasks.Subtask;
 import tasks.Task;
@@ -47,5 +46,5 @@ public interface TaskManager {
 
     void removeAllEpics();
 
-    List<AbstractTask> getHistory();
+    List<Task> getHistory();
 }
