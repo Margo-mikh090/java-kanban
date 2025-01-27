@@ -61,6 +61,7 @@ public class Task {
         Task task = (Task) obj;
         return id == task.id;
     }
+    
     @Override
     public int hashCode() {
         return id;
