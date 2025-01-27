@@ -1,4 +1,5 @@
 package tasks;
+
 import enums.TaskStatus;
 import enums.TaskType;
 
@@ -61,7 +62,7 @@ public class Task {
         Task task = (Task) obj;
         return id == task.id;
     }
-    
+
     @Override
     public int hashCode() {
         return id;
