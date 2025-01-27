@@ -47,7 +47,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 line  = br.readLine();
                 if (fromString(line).isPresent()) {
                     AbstractTask task = fromString(line).get();
-                    int idTask = task.getId();
                     switch (task.getType()) {
                         case TASK:
                             storage.getTasksMap().put(task.getId(), (Task) task);
