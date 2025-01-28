@@ -1,6 +1,7 @@
 package managers;
 
-import statuses.TaskStatus;
+import enums.TaskStatus;
+import tasks.Task;
 import tasks.Epic;
 import tasks.Subtask;
 import tasks.Task;
@@ -11,11 +12,11 @@ import java.util.List;
 import java.util.Map;
 
 public class InMemoryTaskManager implements TaskManager {
-    private final Map<Integer, Task> tasks = new HashMap<>();
-    private final Map<Integer, Epic> epics = new HashMap<>();
-    private final Map<Integer, Subtask> subtasks = new HashMap<>();
+    protected final Map<Integer, Task> tasks = new HashMap<>();
+    protected final Map<Integer, Epic> epics = new HashMap<>();
+    protected final Map<Integer, Subtask> subtasks = new HashMap<>();
     private final HistoryManager historyManager = Managers.getDefaultHistory();
-    private int nextID = 1;
+    protected int nextID = 1;
 
     @Override
     public Task addTask(Task task) {

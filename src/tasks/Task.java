@@ -1,12 +1,13 @@
 package tasks;
-import statuses.TaskStatus;
+
+import enums.TaskStatus;
+import enums.TaskType;
 
 public class Task {
-    private int id;
-    private final String taskName;
-    private final String taskDescription;
-    private TaskStatus status;
-
+    protected int id;
+    protected final String taskName;
+    protected final String taskDescription;
+    protected TaskStatus status;
 
     public Task(int id, String taskName, String taskDescription, TaskStatus status) {
         this.id = id;
@@ -15,18 +16,16 @@ public class Task {
         this.status = status;
     }
 
-    public Task(String taskName, String taskDescription, TaskStatus status) {
-        this(0, taskName, taskDescription, status);
-    }
-
-    public Task(int id, String taskName, String taskDescription) {
-        this(id, taskName, taskDescription, TaskStatus.IN_PROGRESS);
-    }
-
     public Task(String taskName, String taskDescription) {
-        this(0, taskName, taskDescription, TaskStatus.IN_PROGRESS);
+        this.taskName = taskName;
+        this.taskDescription = taskDescription;
     }
 
+    public Task(String taskName, String taskDescription, TaskStatus status) {
+        this.taskName = taskName;
+        this.taskDescription = taskDescription;
+        this.status = status;
+    }
 
     public int getId() {
         return id;
@@ -52,6 +51,10 @@ public class Task {
         this.status = status;
     }
 
+    public TaskType getType() {
+        return TaskType.TASK;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
@@ -67,12 +70,11 @@ public class Task {
 
     @Override
     public String toString() {
-        return "tasks.Task{" + "id=" + id +
-                ", status=" + status +
-                ", name='" + taskName + '\'' +
-                ", description='" + taskDescription + '\'' +
-                '}';
+        return getId() + ","
+                + getType() + ","
+                + getTaskName() + ","
+                + getStatus() + ","
+                + getTaskDescription();
     }
-
-
 }
+

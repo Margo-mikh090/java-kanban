@@ -1,5 +1,5 @@
 import managers.InMemoryTaskManager;
-import statuses.TaskStatus;
+import enums.TaskStatus;
 import tasks.Epic;
 import tasks.Subtask;
 import tasks.Task;

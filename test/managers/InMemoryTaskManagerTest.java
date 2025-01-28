@@ -7,7 +7,7 @@ import tasks.Subtask;
 import tasks.Task;
 
 import static org.junit.jupiter.api.Assertions.*;
-import statuses.TaskStatus;
+import enums.TaskStatus;
 
 import java.util.List;
 

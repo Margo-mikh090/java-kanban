@@ -1,5 +1,6 @@
 package tasks;
-import statuses.TaskStatus;
+import enums.TaskStatus;
+import enums.TaskType;
 
 public class Subtask extends Task {
     private int epicID;
@@ -24,12 +25,17 @@ public class Subtask extends Task {
     }
 
     @Override
+    public TaskType getType() {
+        return TaskType.SUBTASK;
+    }
+
+    @Override
     public String toString() {
-        return "tasks.Subtask{" + "id=" + getId() +
-                ", status=" + getStatus() +
-                ", name='" + getTaskName() + '\'' +
-                ", description='" + getTaskDescription() + '\'' +
-                ", epicID=" + epicID +
-                '}';
+        return getId() + ","
+                + getType() + ","
+                + getTaskName() + ","
+                + getStatus() + ","
+                + getTaskDescription() + ","
+                + getEpicID();
     }
 }
