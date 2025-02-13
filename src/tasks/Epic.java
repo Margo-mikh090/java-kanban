@@ -10,17 +10,17 @@ public class Epic extends Task {
     private List<Integer> subtaskIDs = new ArrayList<>();
 
     public Epic(int id, String taskName, String taskDescription, List<Integer> subtaskIDs) {
-        super(id, taskName, taskDescription, TaskStatus.IN_PROGRESS);
+        super(id, taskName, taskDescription, TaskStatus.IN_PROGRESS, "01.01.00 00:00", 60);
         this.subtaskIDs = subtaskIDs;
     }
 
     public Epic(String taskName, String taskDescription) {
-        super(taskName, taskDescription);
+        super(taskName, taskDescription, TaskStatus.IN_PROGRESS, "01.01.00 00:00", 60);
     }
 
     //Конструктор для теста эпика
     public Epic(int id, String taskName, String taskDescription, TaskStatus status) {
-        super(id, taskName, taskDescription, status);
+        super(id, taskName, taskDescription, status, "01.01.00 00:00", 60);
     }
 
     public void removeSubtask(int id) {
@@ -42,14 +42,5 @@ public class Epic extends Task {
     @Override
     public TaskType getType() {
         return TaskType.EPIC;
-    }
-
-    @Override
-    public String toString() {
-        return getId() + ","
-                + getType() + ","
-                + getTaskName() + ","
-                + getStatus() + ","
-                + getTaskDescription();
     }
 }

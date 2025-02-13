@@ -20,7 +20,7 @@ class InMemoryHistoryManagerTest {
     @Test
     void shouldReturnListWithOneTaskWhenTasksEqual() {
         final Task task =  taskManager.addTask(new Task(0, "Test addNewTask",
-                "Test addNewTask description", TaskStatus.NEW));
+                "Test addNewTask description", TaskStatus.NEW, "08.02.25 11:00", 180));
         for (int i = 1; i < 6; i++) {
             taskManager.getTask(task.getId());
         }
@@ -34,11 +34,11 @@ class InMemoryHistoryManagerTest {
         final Epic epic = taskManager.addEpic(new Epic("Test addNewEpic",
                 "Test addNewEpic description"));
         final Subtask subtask1 = taskManager.addSubtask(new Subtask("Test addNewSubtask1",
-                "Test addNewSubtask1 description", TaskStatus.IN_PROGRESS, epic.getId()));
+                "Test addNewSubtask1 description", TaskStatus.IN_PROGRESS, epic.getId(), "08.02.25 11:00", 180));
         final Subtask subtask2 = taskManager.addSubtask(new Subtask("Test addNewSubtask2",
-                "Test addNewSubtask2 description", TaskStatus.NEW, epic.getId()));
+                "Test addNewSubtask2 description", TaskStatus.NEW, epic.getId(), "08.02.25 11:00", 180));
         final Task task = taskManager.addTask(new Task("Test addNewTask",
-                "Test addNewTask description", TaskStatus.NEW));
+                "Test addNewTask description", TaskStatus.NEW, "08.02.25 11:00", 180));
         taskManager.getTask(task.getId());
         taskManager.getSubtask(subtask1.getId());
         taskManager.getEpic(epic.getId());
@@ -53,10 +53,10 @@ class InMemoryHistoryManagerTest {
     @Test
     void shouldReturnOldTaskVersionInViewedTasks() {
         final Task initialTask = taskManager.addTask(new Task("Test addNewTask",
-                "Test addNewTask description", TaskStatus.NEW));
+                "Test addNewTask description", TaskStatus.NEW, "08.02.25 11:00", 180));
         taskManager.getTask(initialTask.getId());
         final Task updatedTask = taskManager.updateTask(new Task(initialTask.getId(), "Test updateTask",
-                "Test updateTask description", TaskStatus.IN_PROGRESS));
+                "Test updateTask description", TaskStatus.IN_PROGRESS, "08.02.25 11:00", 180));
         assertEquals(1, taskManager.getHistory().size());
         assertEquals(initialTask.getTaskName(), taskManager.getHistory().getFirst().getTaskName(),
                 "В истории не сохранилась старая версия");
@@ -68,11 +68,11 @@ class InMemoryHistoryManagerTest {
         final Epic epic = taskManager.addEpic(new Epic("Test addNewEpic",
                 "Test addNewEpic description"));
         final Subtask subtask1 = taskManager.addSubtask(new Subtask("Test addNewSubtask1",
-                "Test addNewSubtask1 description", TaskStatus.IN_PROGRESS, epic.getId()));
+                "Test addNewSubtask1 description", TaskStatus.IN_PROGRESS, epic.getId(), "08.02.25 11:00", 180));
         final Subtask subtask2 = taskManager.addSubtask(new Subtask("Test addNewSubtask2",
-                "Test addNewSubtask2 description", TaskStatus.NEW, epic.getId()));
+                "Test addNewSubtask2 description", TaskStatus.NEW, epic.getId(), "08.02.25 11:00", 180));
         final Task task = taskManager.addTask(new Task("Test addNewTask",
-                "Test addNewTask description", TaskStatus.NEW));
+                "Test addNewTask description", TaskStatus.NEW, "08.02.25 11:00", 180));
         taskManager.getTask(task.getId());
         taskManager.getSubtask(subtask1.getId());
         taskManager.getEpic(epic.getId());

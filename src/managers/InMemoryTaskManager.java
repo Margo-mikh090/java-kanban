@@ -1,15 +1,15 @@
 package managers;
 
 import enums.TaskStatus;
+import exceptions.TimeIntersectionException;
 import tasks.Task;
 import tasks.Epic;
 import tasks.Subtask;
-import tasks.Task;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class InMemoryTaskManager implements TaskManager {
     protected final Map<Integer, Task> tasks = new HashMap<>();
@@ -17,64 +17,130 @@ public class InMemoryTaskManager implements TaskManager {
     protected final Map<Integer, Subtask> subtasks = new HashMap<>();
     private final HistoryManager historyManager = Managers.getDefaultHistory();
     protected int nextID = 1;
+    protected Set<Task> prioritizedTasks;
+
+    public InMemoryTaskManager() {
+        prioritizedTasks = new TreeSet<>(Comparator.comparing(Task::getStartTime).thenComparing(Task::getId));
+    }
 
     @Override
     public Task addTask(Task task) {
-        task.setId(nextID++);
-        tasks.put(task.getId(), task);
-
-        return tasks.get(task.getId());
+        try {
+            if (!isAvailableTaskDuration(task, prioritizedTasks)) {
+                throw new TimeIntersectionException("Данная задача пересекается по времени с уже существующей");
+            }
+            prioritizedTasks.add(task);
+            task.setId(nextID++);
+            tasks.put(task.getId(), task);
+            return tasks.get(task.getId());
+        } catch (TimeIntersectionException e) {
+            System.out.println(e.getMessage());
+        }
+        return null;
     }
 
     @Override
     public Epic addEpic(Epic epic) {
-        epic.setId(nextID++);
-        epics.put(epic.getId(), epic);
-        updateEpicStatus(epic.getId());
+            epic.setId(nextID++);
+            epics.put(epic.getId(), epic);
+            updateEpicStatus(epic.getId());
+            try {
+                updateEpicTime(epic.getId());
+            } catch (NoSuchElementException e) {
+                System.out.println("Ошибка расчета времени эпика");
+            }
+            prioritizedTasks.add(epic);
 
-        return epics.get(epic.getId());
+            return epics.get(epic.getId());
     }
 
     @Override
     public Subtask addSubtask(Subtask subtask) {
-        subtask.setId(nextID++);
-        subtasks.put(subtask.getId(), subtask);
-        List<Integer> subtasksIDs = epics.get(subtask.getEpicID()).getSubtaskIDs();
-        Epic epic = epics.get(subtask.getEpicID());
-        subtasksIDs.add(subtask.getId());
-        epic.setSubtaskIDs(subtasksIDs);
-        epics.put(subtask.getEpicID(), epic);
-        updateEpicStatus(subtask.getEpicID());
-
-        return subtasks.get(subtask.getId());
+        try {
+            if (!isAvailableTaskDuration(subtask, prioritizedTasks)) {
+                throw new TimeIntersectionException("Данная задача пересекается по времени с уже существующей");
+            }
+            subtask.setId(nextID++);
+            subtasks.put(subtask.getId(), subtask);
+            prioritizedTasks.add(subtask);
+            List<Integer> subtasksIDs = epics.get(subtask.getEpicID()).getSubtaskIDs();
+            Epic epic = epics.get(subtask.getEpicID());
+            prioritizedTasks.removeIf(taskFromSet -> taskFromSet.equals(epic));
+            subtasksIDs.add(subtask.getId());
+            epic.setSubtaskIDs(subtasksIDs);
+            updateEpicStatus(subtask.getEpicID());
+            try {
+                updateEpicTime(epic.getId());
+            } catch (NoSuchElementException e) {
+                System.out.println("Ошибка расчета времени эпика");
+            }
+            prioritizedTasks.add(epic);
+            epics.put(subtask.getEpicID(), epic);
+            return subtasks.get(subtask.getId());
+        } catch (TimeIntersectionException e) {
+            System.out.println(e.getMessage());
+        }
+        return null;
     }
 
     @Override
     public Task updateTask(Task task) {
-        tasks.put(task.getId(), task);
-
-        return tasks.get(task.getId());
+        try {
+            prioritizedTasks.removeIf(taskFromSet -> taskFromSet.equals(task));
+            if (!isAvailableTaskDuration(task, prioritizedTasks)) {
+                throw new TimeIntersectionException("Данная задача пересекается по времени с уже существующей");
+            }
+            tasks.put(task.getId(), task);
+            prioritizedTasks.add(task);
+            return tasks.get(task.getId());
+        } catch (TimeIntersectionException e) {
+            System.out.println(e.getMessage());
+        }
+        return null;
     }
 
     @Override
     public Subtask updateSubtask(Subtask subtask) {
-        subtasks.put(subtask.getId(), subtask);
-        Epic epic = epics.get(subtask.getEpicID());
-        updateEpicStatus(epic.getId());
-
-        return subtasks.get(subtask.getId());
+        try {
+            prioritizedTasks.removeIf(taskFromSet -> taskFromSet.equals(subtask));
+            if (!isAvailableTaskDuration(subtask, prioritizedTasks)) {
+                throw new TimeIntersectionException("Данная задача пересекается по времени с уже существующей");
+            }
+            subtasks.put(subtask.getId(), subtask);
+            prioritizedTasks.add(subtask);
+            Epic epic = epics.get(subtask.getEpicID());
+            updateEpicStatus(epic.getId());
+            try {
+                updateEpicTime(epic.getId());
+            } catch (NoSuchElementException e) {
+                System.out.println("Ошибка расчета времени эпика");
+            }
+            return subtasks.get(subtask.getId());
+        } catch (TimeIntersectionException e) {
+            System.out.println(e.getMessage());
+        }
+        return null;
     }
 
     @Override
     public Epic updateEpic(Epic epic) {
+        prioritizedTasks.removeIf(taskFromSet -> taskFromSet.equals(epic));
         epics.put(epic.getId(), epic);
         updateEpicStatus(epic.getId());
+        try {
+            updateEpicTime(epic.getId());
+        } catch (NoSuchElementException e) {
+            System.out.println("Ошибка расчета времени эпика");
+        }
+        prioritizedTasks.add(epic);
+
         return epics.get(epic.getId());
     }
 
     @Override
     public void removeTask(int id) {
         historyManager.remove(id);
+        prioritizedTasks.removeIf(taskFromSet -> taskFromSet.equals(tasks.get(id)));
         tasks.remove(id);
     }
 
@@ -85,6 +151,12 @@ public class InMemoryTaskManager implements TaskManager {
         Epic epic = epics.get(removedSubtask.getEpicID());
         epic.removeSubtask(id);
         updateEpicStatus(epic.getId());
+        try {
+            updateEpicTime(epic.getId());
+        } catch (NoSuchElementException e) {
+            System.out.println("Ошибка расчета времени эпика");
+        }
+        prioritizedTasks.removeIf(taskFromSet -> taskFromSet.equals(removedSubtask));
     }
 
     @Override
@@ -94,6 +166,7 @@ public class InMemoryTaskManager implements TaskManager {
             subtasks.remove(subtaskID);
         }
         historyManager.remove(id);
+        prioritizedTasks.removeIf(taskFromSet -> taskFromSet.equals(epics.get(id)));
         epics.remove(id);
     }
 
@@ -118,44 +191,31 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public List<Subtask> getSubtasksByEpicID(int id) {
-        List<Subtask> subtasksInEpic = new ArrayList<>();
-        for (Integer subtaskID : epics.get(id).getSubtaskIDs()) {
-            subtasksInEpic.add(subtasks.get(subtaskID));
-        }
-        return  subtasksInEpic;
+        return subtasks.values().stream()
+                .filter(subtask -> subtask.getEpicID() == id)
+                .toList();
     }
 
     @Override
     public List<Task> getListOfTasks() {
-        List<Task> listOfTasks = new ArrayList<>();
-        for (Integer task : tasks.keySet()) {
-            listOfTasks.add(tasks.get(task));
-        }
-        return listOfTasks;
+        return tasks.values().stream().toList();
     }
 
     @Override
     public List<Subtask> getListOfSubtasks() {
-        List<Subtask> listOfSubtasks = new ArrayList<>();
-        for (Integer subtask : subtasks.keySet()) {
-            listOfSubtasks.add(subtasks.get(subtask));
-        }
-        return listOfSubtasks;
+        return subtasks.values().stream().toList();
     }
 
     @Override
     public List<Epic> getListOfEpics() {
-        List<Epic> listOfEpics = new ArrayList<>();
-        for (Integer epic : epics.keySet()) {
-            listOfEpics.add(epics.get(epic));
-        }
-        return listOfEpics;
+        return epics.values().stream().toList();
     }
 
     @Override
     public void removeAllTasks() {
         for (Task task : tasks.values()) {
-                historyManager.remove(task.getId());
+            historyManager.remove(task.getId());
+            prioritizedTasks.removeIf(taskFromSet -> taskFromSet.equals(task));
         }
         tasks.clear();
     }
@@ -164,11 +224,17 @@ public class InMemoryTaskManager implements TaskManager {
     public void removeAllSubtasks() {
         for (Subtask subtask : subtasks.values()) {
             historyManager.remove(subtask.getId());
+            prioritizedTasks.removeIf(taskFromSet -> taskFromSet.equals(subtask));
         }
         subtasks.clear();
         for (Epic epic : epics.values()) {
             epic.clearSubtasks();
             updateEpicStatus(epic.getId());
+            try {
+                updateEpicTime(epic.getId());
+            } catch (NoSuchElementException e) {
+                System.out.println("Ошибка расчета времени эпика");
+            }
         }
     }
 
@@ -176,10 +242,12 @@ public class InMemoryTaskManager implements TaskManager {
     public void removeAllEpics() {
         for (Subtask subtask : subtasks.values()) {
             historyManager.remove(subtask.getId());
+            prioritizedTasks.removeIf(taskFromSet -> taskFromSet.equals(subtask));
         }
         subtasks.clear();
         for (Epic epic : epics.values()) {
             historyManager.remove(epic.getId());
+            prioritizedTasks.removeIf(taskFromSet -> taskFromSet.equals(epic));
         }
         epics.clear();
     }
@@ -187,6 +255,51 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public List<Task> getHistory() {
         return historyManager.getHistory();
+    }
+
+    @Override
+    public Set<Task> getPrioritizedTasks() {
+        return prioritizedTasks;
+    }
+
+    private boolean isAvailableTaskDuration(Task task, Set<Task> prioritizedTasks) {
+        if (task.getStartTime() != null) {
+            LocalDateTime startTime = task.getStartTime();
+            LocalDateTime endTime = task.getEndTime();
+            if (!prioritizedTasks.isEmpty()) {
+                Set<Task> timeCheck = prioritizedTasks.stream()
+                        .filter(taskFromSet -> (taskFromSet.getStartTime().isAfter(startTime)
+                                && taskFromSet.getStartTime().isBefore(endTime)
+                                || taskFromSet.getEndTime().isBefore(endTime)
+                                && taskFromSet.getEndTime().isAfter(startTime)))
+                        .filter(taskFromSet -> !taskFromSet.equals(task))
+                        .collect(Collectors.toSet());
+                return timeCheck.isEmpty();
+            } else {
+                return true;
+            }
+        } else {
+            return false;
+        }
+    }
+
+    private void updateEpicTime(int epicID) {
+        Epic epic = epics.get(epicID);
+        if (!epic.getSubtaskIDs().isEmpty()) {
+            LocalDateTime epicStartTime = epic.getSubtaskIDs().stream()
+                    .map(subtasks::get)
+                    .min(Comparator.comparing(Subtask::getStartTime))
+                    .orElseThrow().getStartTime();
+            LocalDateTime epicEndTime = epic.getSubtaskIDs().stream()
+                    .map(subtasks::get)
+                    .max(Comparator.comparing(Subtask::getEndTime))
+                    .orElseThrow().getEndTime();
+            epic.setStartTime(epicStartTime);
+            epic.setDuration(Duration.between(epicStartTime, epicEndTime));
+        } else {
+            epic.setStartTime(LocalDateTime.now());
+            epic.setDuration(Duration.ofMinutes(60));
+        }
     }
 
     private void updateEpicStatus(int epicID) {
