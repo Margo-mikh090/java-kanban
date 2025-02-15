@@ -1,6 +1,7 @@
 package managers;
 
 import enums.TaskStatus;
+import exceptions.TimeIntersectionException;
 import org.junit.jupiter.api.Test;
 import tasks.Epic;
 import tasks.Subtask;
@@ -19,51 +20,51 @@ abstract class TaskManagerTest<T extends TaskManager> {
 
     @Test
     void addTask() {
-        final Task task = taskManager.addTask(new Task("Test addNewTask",
-                "Test addNewTask description", TaskStatus.NEW, "08.02.25 11:00", 180));
-        final Task savedTask = taskManager.getTask(task.getId());
+            final Task task = taskManager.addTask(new Task("Test addNewTask",
+                    "Test addNewTask description", TaskStatus.NEW, "08.02.25 11:00", 180));
+            final Task savedTask = taskManager.getTask(task.getId());
 
-        assertNotNull(savedTask, "Задача не найдена.");
-        assertEquals(task, savedTask, "Задачи не совпадают.");
+            assertNotNull(savedTask, "Задача не найдена.");
+            assertEquals(task, savedTask, "Задачи не совпадают.");
 
-        final List<Task> tasks = taskManager.getListOfTasks();
+            final List<Task> tasks = taskManager.getListOfTasks();
 
-        assertNotNull(tasks, "Задачи не возвращаются.");
-        assertEquals(1, tasks.size(), "Неверное количество задач.");
-        assertEquals(task, tasks.get(0), "Задачи не совпадают.");
+            assertNotNull(tasks, "Задачи не возвращаются.");
+            assertEquals(1, tasks.size(), "Неверное количество задач.");
+            assertEquals(task, tasks.get(0), "Задачи не совпадают.");
     }
 
+    @Test
     void addEpicAndSubtasks() {
-        final Epic epic = taskManager.addEpic(new Epic("Test addNewEpic",
-                "Test addNewEpic description"));
-        final Subtask subtask1 = taskManager.addSubtask(new Subtask("Test addNewSubtask1",
-                "Test addNewSubtask1 description", TaskStatus.IN_PROGRESS, epic.getId(), "09.02.25 11:00", 180));
-        final Subtask subtask2 = taskManager.addSubtask(new Subtask("Test addNewSubtask2",
-                "Test addNewSubtask2 description", TaskStatus.NEW, epic.getId(), "10.02.25 11:00", 180));
+            final Epic epic = taskManager.addEpic(new Epic("Test addNewEpic",
+                    "Test addNewEpic description"));
+            final Subtask subtask1 = taskManager.addSubtask(new Subtask("Test addNewSubtask1",
+                    "Test addNewSubtask1 description", TaskStatus.IN_PROGRESS, epic.getId(), "09.02.25 11:00", 180));
+            final Subtask subtask2 = taskManager.addSubtask(new Subtask("Test addNewSubtask2",
+                    "Test addNewSubtask2 description", TaskStatus.NEW, epic.getId(), "10.02.25 11:00", 180));
+            final Epic savedEpic = taskManager.getEpic(epic.getId());
+            assertNotNull(savedEpic, "Эпик не найден");
+            assertEquals(epic, savedEpic, "Эпики не совпадают");
 
-        final Epic savedEpic = taskManager.getEpic(epic.getId());
-        assertNotNull(savedEpic, "Эпик не найден");
-        assertEquals(epic, savedEpic, "Эпики не совпадают");
+            final Subtask savedSubtask1 = taskManager.getSubtask(subtask1.getId());
+            final Subtask savedSubtask2 = taskManager.getSubtask(subtask2.getId());
+            assertNotNull(subtask1, "Подзадача не найдена");
+            assertNotNull(subtask2, "Подзадача не найдена");
+            assertEquals(subtask1, savedSubtask1, "Подзадачи не совпадают");
+            assertEquals(subtask2, savedSubtask2, "Подзадачи не совпадают");
 
-        final Subtask savedSubtask1 = taskManager.getSubtask(subtask1.getId());
-        final Subtask savedSubtask2 = taskManager.getSubtask(subtask2.getId());
-        assertNotNull(subtask1, "Подзадача не найдена");
-        assertNotNull(subtask2, "Подзадача не найдена");
-        assertEquals(subtask1, savedSubtask1, "Подзадачи не совпадают");
-        assertEquals(subtask2, savedSubtask2, "Подзадачи не совпадают");
+            final List<Epic> epics = taskManager.getListOfEpics();
+            assertNotNull(epics, "Эпики не возвращаются");
+            assertEquals(1, epics.size(), "Неверное количество эпиков");
+            assertEquals(epic, epics.get(0), "Эпики не совпадают");
 
-        final List<Epic> epics = taskManager.getListOfEpics();
-        assertNotNull(epics, "Эпики не возвращаются");
-        assertEquals(1, epics.size(), "Неверное количество эпиков");
-        assertEquals(epic, epics.get(0), "Эпики не совпадают");
-
-        final List<Subtask> subtasksInEpic = taskManager.getSubtasksByEpicID(epic.getId());
-        final List<Subtask> subtasks = taskManager.getListOfSubtasks();
-        assertNotNull(subtasksInEpic, "Подзадачи эпика не возвращаются");
-        assertEquals(2, subtasksInEpic.size(), "Неверное количество подзадач в эпике");
-        assertEquals(2, subtasks.size(), "Неверное количество подзадач");
-        assertEquals(subtask2, subtasksInEpic.get(1), "Подзадачи не совпадают");
-        assertEquals(subtask1, subtasks.get(0), "Подзадачи не совпадают");
+            final List<Subtask> subtasksInEpic = taskManager.getSubtasksByEpicID(epic.getId());
+            final List<Subtask> subtasks = taskManager.getListOfSubtasks();
+            assertNotNull(subtasksInEpic, "Подзадачи эпика не возвращаются");
+            assertEquals(2, subtasksInEpic.size(), "Неверное количество подзадач в эпике");
+            assertEquals(2, subtasks.size(), "Неверное количество подзадач");
+            assertEquals(subtask2, subtasksInEpic.get(1), "Подзадачи не совпадают");
+            assertEquals(subtask1, subtasks.get(0), "Подзадачи не совпадают");
     }
 
     @Test
@@ -187,34 +188,62 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void shouldBeCorrectValidationWithTimeIntersection() {
-        final Task task1 = taskManager.addTask(new Task("Test addNewTask",
-                "Test addNewTask description", TaskStatus.NEW, "08.02.25 11:00", 180));
-        final Task task2 = taskManager.addTask(new Task("Test addNewTask",
-                "Test addNewTask description", TaskStatus.NEW, "08.02.25 08:00", 300));
-        final Task task3 = taskManager.addTask(new Task("Test addNewTask",
-                "Test addNewTask description", TaskStatus.NEW, "08.02.25 14:00", 60));
-        final Task task4 = taskManager.addTask(new Task("Test addNewTask",
-                "Test addNewTask description", TaskStatus.NEW, "08.02.25 15:00", 60));
-        final Task task5 = taskManager.addTask(new Task("Test addNewTask",
-                "Test addNewTask description", TaskStatus.NEW, "08.02.25 08:00", 190));
-        taskManager.updateTask(new Task(task4.getId(), "Test updateTask",
-                "Test addNewTask description", TaskStatus.IN_PROGRESS,
-                "11.02.25 15:00", 60));
+    void shouldBeCorrectValidationWithTimeIntersection() throws TimeIntersectionException {
+        Task task1 = null;
+        try {
+            task1 = taskManager.addTask(new Task("Test addNewTask",
+                    "Test addNewTask description", TaskStatus.NEW, "08.02.25 11:00", 180));
+        } catch (TimeIntersectionException e) {
+            assertNull(e);
+        }
+        try {
+            Task task2 = taskManager.addTask(new Task("Test addNewTask",
+                    "Test addNewTask description", TaskStatus.NEW, "08.02.25 08:00", 300));
+        } catch (TimeIntersectionException e) {
+            System.out.println(e.getMessage());
+        }
+        try {
+            Task task3 = taskManager.addTask(new Task("Test addNewTask",
+                    "Test addNewTask description", TaskStatus.NEW, "08.02.25 14:00", 60));
+        } catch (TimeIntersectionException e) {
+            System.out.println(e.getMessage());
+        }
+        try {
+            Task task4 = taskManager.addTask(new Task("Test addNewTask",
+                    "Test addNewTask description", TaskStatus.NEW, "08.02.25 15:00", 60));
+            taskManager.updateTask(new Task(task4.getId(), "Test updateTask",
+                    "Test addNewTask description", TaskStatus.IN_PROGRESS,
+                    "11.02.25 15:00", 60));
+        } catch (TimeIntersectionException e) {
+            System.out.println(e.getMessage());
+        }
+        try {
+            Task task5 = taskManager.addTask(new Task("Test addNewTask",
+                    "Test addNewTask description", TaskStatus.NEW, "08.02.25 08:00", 175));
+        } catch (TimeIntersectionException e) {
+            System.out.println(e.getMessage());
+        }
+        try {
+            Task task7 = taskManager.addTask(new Task("Test addNewTask",
+                    "Test addNewTask description", TaskStatus.NEW, "08.02.25 08:00", 175));
+        } catch (TimeIntersectionException e) {
+            System.out.println(e.getMessage());
+        }
         assertEquals(3, taskManager.getPrioritizedTasks().size());
-        final Epic epic = taskManager.addEpic(new Epic("Test addNewEpic",
-                "Test addNewEpic description"));
-        final Subtask subtask1 = taskManager.addSubtask(new Subtask("Test addNewSubtask1",
-                "Test addNewSubtask1 description", TaskStatus.IN_PROGRESS, epic.getId(),
-                "09.02.25 11:00", 180));
-        final Subtask subtask2 = taskManager.addSubtask(new Subtask("Test addNewSubtask2",
-                "Test addNewSubtask2 description", TaskStatus.NEW, epic.getId(),
-                "09.02.25 08:00", 60));
-        assertEquals(6, taskManager.getPrioritizedTasks().size());
-        taskManager.removeAllSubtasks();
-        assertEquals(4, taskManager.getPrioritizedTasks().size());
-        taskManager.removeTask(task1.getId());
-        assertEquals(3, taskManager.getPrioritizedTasks().size());
+            Epic epic = taskManager.addEpic(new Epic("Test addNewEpic",
+                    "Test addNewEpic description"));
+            Subtask subtask1 = taskManager.addSubtask(new Subtask("Test addNewSubtask1",
+                    "Test addNewSubtask1 description", TaskStatus.IN_PROGRESS, epic.getId(),
+                    "09.02.25 11:00", 180));
+            Subtask subtask2 = taskManager.addSubtask(new Subtask("Test addNewSubtask2",
+                    "Test addNewSubtask2 description", TaskStatus.NEW, epic.getId(),
+                    "09.02.25 08:00", 60));
+            assertEquals(5, taskManager.getPrioritizedTasks().size());
+            taskManager.removeAllSubtasks();
+            assertEquals(3, taskManager.getPrioritizedTasks().size());
+            taskManager.removeTask(task1.getId());
+            assertEquals(2, taskManager.getPrioritizedTasks().size());
+
     }
 
     @Test
@@ -222,7 +251,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         final Task task1 = taskManager.addTask(new Task("Test addNewTask",
                 "Test addNewTask description", TaskStatus.NEW, "08.02.25 11:00", 180));
         final Task task2 = taskManager.addTask(new Task("Test addNewTask",
-                "Test addNewTask description", TaskStatus.NEW, "08.02.25 14:00", 60));
+                "Test addNewTask description", TaskStatus.NEW, "08.02.25 14:05", 60));
         final Epic epic = taskManager.addEpic(new Epic("Test addNewEpic",
                 "Test addNewEpic description"));
         final Subtask subtask1 = taskManager.addSubtask(new Subtask("Test addNewSubtask1",

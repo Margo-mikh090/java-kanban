@@ -36,9 +36,9 @@ class InMemoryHistoryManagerTest {
         final Subtask subtask1 = taskManager.addSubtask(new Subtask("Test addNewSubtask1",
                 "Test addNewSubtask1 description", TaskStatus.IN_PROGRESS, epic.getId(), "08.02.25 11:00", 180));
         final Subtask subtask2 = taskManager.addSubtask(new Subtask("Test addNewSubtask2",
-                "Test addNewSubtask2 description", TaskStatus.NEW, epic.getId(), "08.02.25 11:00", 180));
+                "Test addNewSubtask2 description", TaskStatus.NEW, epic.getId(), "09.02.25 11:00", 180));
         final Task task = taskManager.addTask(new Task("Test addNewTask",
-                "Test addNewTask description", TaskStatus.NEW, "08.02.25 11:00", 180));
+                "Test addNewTask description", TaskStatus.NEW, "10.02.25 11:00", 180));
         taskManager.getTask(task.getId());
         taskManager.getSubtask(subtask1.getId());
         taskManager.getEpic(epic.getId());
@@ -70,9 +70,9 @@ class InMemoryHistoryManagerTest {
         final Subtask subtask1 = taskManager.addSubtask(new Subtask("Test addNewSubtask1",
                 "Test addNewSubtask1 description", TaskStatus.IN_PROGRESS, epic.getId(), "08.02.25 11:00", 180));
         final Subtask subtask2 = taskManager.addSubtask(new Subtask("Test addNewSubtask2",
-                "Test addNewSubtask2 description", TaskStatus.NEW, epic.getId(), "08.02.25 11:00", 180));
+                "Test addNewSubtask2 description", TaskStatus.NEW, epic.getId(), "09.02.25 11:00", 180));
         final Task task = taskManager.addTask(new Task("Test addNewTask",
-                "Test addNewTask description", TaskStatus.NEW, "08.02.25 11:00", 180));
+                "Test addNewTask description", TaskStatus.NEW, "10.02.25 11:00", 180));
         taskManager.getTask(task.getId());
         taskManager.getSubtask(subtask1.getId());
         taskManager.getEpic(epic.getId());
