@@ -25,7 +25,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public Task addTask(Task task) throws TimeIntersectionException {
+    public Task addTask(Task task) {
         if (!isAvailableTaskDuration(task)) {
             throw new TimeIntersectionException("Данная задача пересекается по времени с уже существующей");
         }
@@ -47,7 +47,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public Subtask addSubtask(Subtask subtask) throws TimeIntersectionException, UpdateEpicTimeException {
+    public Subtask addSubtask(Subtask subtask) throws UpdateEpicTimeException {
         if (!isAvailableTaskDuration(subtask)) {
             throw new TimeIntersectionException("Данная задача пересекается по времени с уже существующей");
         }
@@ -66,7 +66,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public Task updateTask(Task task) throws TimeIntersectionException {
+    public Task updateTask(Task task) {
         if (!isAvailableTaskDuration(task)) {
             throw new TimeIntersectionException("Данная задача пересекается по времени с уже существующей");
         }
@@ -77,10 +77,13 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public Subtask updateSubtask(Subtask subtask) throws TimeIntersectionException, UpdateEpicTimeException {
+    public Subtask updateSubtask(Subtask subtask) throws UpdateEpicTimeException {
         if (!isAvailableTaskDuration(subtask)) {
             throw new TimeIntersectionException("Данная задача пересекается по времени с уже существующей");
         }
+//        prioritizedTasks.remove(task) в данной ситуации не сработает, так как remove() у TreeSet работает через
+//        естественную сортировку (выдает false и все). Пробовала переписывать компаратор, чтобы точно определять
+//        равенство, совмещать compareTo() и компаратор, но все решения были неверные (но возможно я что-то упустила)
         prioritizedTasks.removeIf(taskFromSet -> taskFromSet.equals(subtask));
         subtasks.put(subtask.getId(), subtask);
         prioritizedTasks.add(subtask);
@@ -122,6 +125,7 @@ public class InMemoryTaskManager implements TaskManager {
     public void removeEpic(int id) {
         for (Integer subtaskID : epics.get(id).getSubtaskIDs()) {
             historyManager.remove(subtaskID);
+            prioritizedTasks.removeIf(taskFromSet -> taskFromSet.equals(subtasks.get(subtaskID)));
             subtasks.remove(subtaskID);
         }
         historyManager.remove(id);
@@ -214,7 +218,6 @@ public class InMemoryTaskManager implements TaskManager {
         return prioritizedTasks;
     }
 
-    //Здравствуйте! Я не Михаил. Меня зовут Маргарита, просто название почты неудачное :(
     private boolean isAvailableTaskDuration(Task task) {
         if (task.getStartTime() != null && !prioritizedTasks.isEmpty()) {
             LocalDateTime startTime = task.getStartTime();
@@ -222,6 +225,8 @@ public class InMemoryTaskManager implements TaskManager {
             Set<Task> timeCheck = prioritizedTasks.stream()
                     .filter(taskFromSet -> (taskFromSet.getStartTime().isAfter(endTime)
                             || taskFromSet.getEndTime().isBefore(startTime)
+                            || taskFromSet.getEndTime().equals(startTime)
+                            || taskFromSet.getStartTime().equals(endTime)
                             || taskFromSet.equals(task)))
                     .collect(Collectors.toSet());
             return timeCheck.size() == prioritizedTasks.size();
@@ -243,7 +248,7 @@ public class InMemoryTaskManager implements TaskManager {
             epic.setDuration(Duration.between(epicStartTime, epicEndTime));
         } else {
             epic.setStartTime(LocalDateTime.now());
-            epic.setDuration(Duration.ofMinutes(60));
+            epic.setDuration(Duration.ofMinutes(0));
         }
     }
 
