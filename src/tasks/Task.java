@@ -3,28 +3,34 @@ package tasks;
 import enums.TaskStatus;
 import enums.TaskType;
 
-public class Task {
-    protected int id;
-    protected final String taskName;
-    protected final String taskDescription;
-    protected TaskStatus status;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
-    public Task(int id, String taskName, String taskDescription, TaskStatus status) {
+public class Task {
+    private int id;
+    private final String taskName;
+    private final String taskDescription;
+    private TaskStatus status;
+    private Duration duration;
+    private LocalDateTime startTime;
+    protected final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yy HH:mm");
+
+    public Task(int id, String taskName, String taskDescription, TaskStatus status, String startTime, long duration) {
         this.id = id;
         this.taskName = taskName;
         this.taskDescription = taskDescription;
         this.status = status;
+        this.startTime = LocalDateTime.parse(startTime, formatter);
+        this.duration = Duration.ofMinutes(duration);
     }
 
-    public Task(String taskName, String taskDescription) {
-        this.taskName = taskName;
-        this.taskDescription = taskDescription;
-    }
-
-    public Task(String taskName, String taskDescription, TaskStatus status) {
+    public Task(String taskName, String taskDescription, TaskStatus status, String startTime, long duration) {
         this.taskName = taskName;
         this.taskDescription = taskDescription;
         this.status = status;
+        this.duration = Duration.ofMinutes(duration);
+        this.startTime = LocalDateTime.parse(startTime, formatter);
     }
 
     public int getId() {
@@ -55,6 +61,26 @@ public class Task {
         return TaskType.TASK;
     }
 
+    public Duration getDuration() {
+        return duration;
+    }
+
+    public void setDuration(Duration duration) {
+        this.duration = duration;
+    }
+
+    public LocalDateTime getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(LocalDateTime startTime) {
+        this.startTime = startTime;
+    }
+
+    public LocalDateTime getEndTime() {
+        return startTime.plus(duration);
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
@@ -74,7 +100,10 @@ public class Task {
                 + getType() + ","
                 + getTaskName() + ","
                 + getStatus() + ","
-                + getTaskDescription();
+                + getTaskDescription() + ","
+                + getDuration().toMinutes() + ","
+                + getStartTime().format(formatter) + ","
+                + getEndTime().format(formatter);
     }
 }
 

@@ -5,19 +5,19 @@ import enums.TaskType;
 public class Subtask extends Task {
     private int epicID;
 
-    public Subtask(int id, String taskName, String taskDescription, TaskStatus status, int epicID) {
-        super(id, taskName, taskDescription, status);
+    public Subtask(int id, String taskName, String taskDescription, TaskStatus status, int epicID, String startTime, long duration) {
+        super(id, taskName, taskDescription, status, startTime, duration);
         this.epicID = epicID;
     }
 
-    public Subtask(String taskName, String taskDescription, TaskStatus status, int epicID) {
-        super(taskName, taskDescription, status);
+    public Subtask(String taskName, String taskDescription, TaskStatus status, int epicID, String startTime, long duration) {
+        super(taskName, taskDescription, status, startTime, duration);
         this.epicID = epicID;
     }
 
     //Конструктор для теста сабтаска
-    public Subtask(int id, String taskName, String taskDescription, TaskStatus status) {
-        super(id, taskName, taskDescription, status);
+    public Subtask(int id, String taskName, String taskDescription, TaskStatus status, String startTime, long duration) {
+        super(id, taskName, taskDescription, status, startTime, duration);
     }
 
     public int getEpicID() {
@@ -36,6 +36,9 @@ public class Subtask extends Task {
                 + getTaskName() + ","
                 + getStatus() + ","
                 + getTaskDescription() + ","
+                + getDuration().toMinutes() + ","
+                + getStartTime().format(formatter) + ","
+                + getEndTime().format(formatter) + ","
                 + getEpicID();
     }
 }
