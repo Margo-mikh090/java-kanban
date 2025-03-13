@@ -2,6 +2,7 @@ package managers;
 
 import enums.TaskStatus;
 import exceptions.ManagerSaveException;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import tasks.Epic;
@@ -38,6 +39,12 @@ class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
         addedEpic2 = fileBackedTaskManager.addEpic(new Epic("Epic", "Epic"));
         addedSubtask2 = fileBackedTaskManager.addSubtask(new Subtask("Subtask",
                 "Subtask", TaskStatus.IN_PROGRESS, addedEpic1.getId(), "10.02.25 11:00", 180));
+    }
+
+    @AfterEach
+    void afterEach() {
+        fileBackedTaskManager.removeAllTasks();
+        fileBackedTaskManager.removeAllEpics();
     }
 
     @Test

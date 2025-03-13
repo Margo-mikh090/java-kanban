@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Epic extends Task {
+
     private List<Integer> subtaskIDs = new ArrayList<>();
 
     public Epic(int id, String taskName, String taskDescription, List<Integer> subtaskIDs) {
@@ -16,6 +17,10 @@ public class Epic extends Task {
 
     public Epic(String taskName, String taskDescription) {
         super(taskName, taskDescription, TaskStatus.IN_PROGRESS, "01.01.00 00:00", 60);
+    }
+
+    public Epic(int id, String taskName, String taskDescription) {
+        super(id, taskName, taskDescription, TaskStatus.IN_PROGRESS, "01.01.00 00:00", 60);
     }
 
     //Конструктор для теста эпика

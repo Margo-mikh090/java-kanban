@@ -1,7 +1,10 @@
 package managers;
 
 import enums.TaskStatus;
+import exceptions.NotFoundException;
 import exceptions.TimeIntersectionException;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import tasks.Epic;
 import tasks.Subtask;
@@ -96,7 +99,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         final Task task = taskManager.addTask(new Task("Test addNewTask",
                 "Test addNewTask description", TaskStatus.NEW, "08.02.25 11:00", 180));
         taskManager.removeTask(task.getId());
-        assertNull(taskManager.getTask(task.getId()), "Задача не удалена");
+        assertThrows(NotFoundException.class, () -> taskManager.getTask(task.getId()));
     }
 
     @Test
@@ -109,7 +112,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
                 "Test addNewSubtask2 description", TaskStatus.NEW, epic.getId(), "08.02.25 11:00", 180));
         assertEquals(2, epic.getSubtaskIDs().size());
         taskManager.removeSubtask(subtask1.getId());
-        assertNull(taskManager.getSubtask(subtask1.getId()), "Подзадача не удалена");
+        assertThrows(NotFoundException.class, () -> taskManager.getSubtask(subtask1.getId()));
         assertEquals(1, epic.getSubtaskIDs().size(), "Подзадача не удалена из эпика");
         assertEquals(subtask2.getId(), epic.getSubtaskIDs().get(0), "Подзадача не удалена из эпика");
     }
@@ -123,9 +126,9 @@ abstract class TaskManagerTest<T extends TaskManager> {
         final Subtask subtask2 = taskManager.addSubtask(new Subtask("Test addNewSubtask2",
                 "Test addNewSubtask2 description", TaskStatus.NEW, epic.getId(), "08.02.25 11:00", 180));
         taskManager.removeEpic(epic.getId());
-        assertNull(taskManager.getEpic(epic.getId()), "Эпик не удален");
-        assertNull(taskManager.getSubtask(subtask1.getId()));
-        assertNull(taskManager.getSubtask(subtask2.getId()));
+        assertThrows(NotFoundException.class, () -> taskManager.getEpic(epic.getId()));
+        assertThrows(NotFoundException.class, () -> taskManager.getSubtask(subtask1.getId()));
+        assertThrows(NotFoundException.class, () -> taskManager.getSubtask(subtask2.getId()));
     }
 
     @Test

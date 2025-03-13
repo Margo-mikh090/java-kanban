@@ -1,5 +1,6 @@
 package tasks;
 
+import com.google.gson.annotations.Expose;
 import enums.TaskStatus;
 import enums.TaskType;
 
@@ -8,20 +9,33 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class Task {
+
+    @Expose
     private int id;
+
+    @Expose
     private final String taskName;
+
+    @Expose
     private final String taskDescription;
+
+    @Expose
     private TaskStatus status;
+
+    @Expose
     private Duration duration;
+
+    @Expose
     private LocalDateTime startTime;
-    protected final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yy HH:mm");
+
+    public static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yy HH:mm");
 
     public Task(int id, String taskName, String taskDescription, TaskStatus status, String startTime, long duration) {
         this.id = id;
         this.taskName = taskName;
         this.taskDescription = taskDescription;
         this.status = status;
-        this.startTime = LocalDateTime.parse(startTime, formatter);
+        this.startTime = LocalDateTime.parse(startTime, DATE_TIME_FORMATTER);
         this.duration = Duration.ofMinutes(duration);
     }
 
@@ -30,7 +44,7 @@ public class Task {
         this.taskDescription = taskDescription;
         this.status = status;
         this.duration = Duration.ofMinutes(duration);
-        this.startTime = LocalDateTime.parse(startTime, formatter);
+        this.startTime = LocalDateTime.parse(startTime, DATE_TIME_FORMATTER);
     }
 
     public int getId() {
@@ -102,8 +116,8 @@ public class Task {
                 + getStatus() + ","
                 + getTaskDescription() + ","
                 + getDuration().toMinutes() + ","
-                + getStartTime().format(formatter) + ","
-                + getEndTime().format(formatter);
+                + getStartTime().format(DATE_TIME_FORMATTER) + ","
+                + getEndTime().format(DATE_TIME_FORMATTER);
     }
 }
 

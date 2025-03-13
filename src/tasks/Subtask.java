@@ -1,8 +1,12 @@
 package tasks;
+
+import com.google.gson.annotations.Expose;
 import enums.TaskStatus;
 import enums.TaskType;
 
 public class Subtask extends Task {
+
+    @Expose
     private int epicID;
 
     public Subtask(int id, String taskName, String taskDescription, TaskStatus status, int epicID, String startTime, long duration) {
@@ -37,8 +41,8 @@ public class Subtask extends Task {
                 + getStatus() + ","
                 + getTaskDescription() + ","
                 + getDuration().toMinutes() + ","
-                + getStartTime().format(formatter) + ","
-                + getEndTime().format(formatter) + ","
+                + getStartTime().format(DATE_TIME_FORMATTER) + ","
+                + getEndTime().format(DATE_TIME_FORMATTER) + ","
                 + getEpicID();
     }
 }
