@@ -12,7 +12,6 @@ import tasks.Epic;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Optional;
 import java.util.regex.Pattern;
 
 public class EpicHandler extends BaseHttpHandler implements HttpHandler {
@@ -47,12 +46,8 @@ public class EpicHandler extends BaseHttpHandler implements HttpHandler {
 
     private void handleGetEpicById(HttpExchange exchange) throws IOException {
         try {
-            Optional<Integer> idOpt = getIdOpt(exchange);
-            if (idOpt.isEmpty()) {
-                sendBadRequest(exchange, "Некорректный id эпика");
-                return;
-            }
-            sendJson(exchange, gson.toJson(taskManager.getEpic(idOpt.get())));
+            int id = getValidId(exchange);
+            if (id != -1) sendJson(exchange, gson.toJson(taskManager.getEpic(id)));
         } catch (NotFoundException e) {
             sendNotFound(exchange, e.getMessage());
         }
@@ -60,12 +55,8 @@ public class EpicHandler extends BaseHttpHandler implements HttpHandler {
 
     private void handleGetSubtasksByEpicId(HttpExchange exchange) throws IOException {
         try {
-            Optional<Integer> idOpt = getIdOpt(exchange);
-            if (idOpt.isEmpty()) {
-                sendBadRequest(exchange, "Некорректный id эпика");
-                return;
-            }
-            sendJson(exchange, gson.toJson(taskManager.getSubtasksByEpicID(idOpt.get())));
+            int id = getValidId(exchange);
+            if (id != -1) sendJson(exchange, gson.toJson(taskManager.getSubtasksByEpicID(id)));
         } catch (NotFoundException e) {
             sendNotFound(exchange, e.getMessage());
         }
@@ -77,7 +68,7 @@ public class EpicHandler extends BaseHttpHandler implements HttpHandler {
             taskManager.addEpic(epic);
             sendCreated(exchange);
         } catch (JsonSyntaxException e) {
-            sendBadRequest(exchange, "Переданные данные не соответствуют Epic.class");
+            sendBadRequest(exchange, "Переданные данные невалидны для создания эпика");
         } catch (UpdateEpicTimeException | ManagerSaveException e) {
             sendError(exchange, e.getMessage());
         }
@@ -85,16 +76,14 @@ public class EpicHandler extends BaseHttpHandler implements HttpHandler {
 
     private void handleUpdateEpic(HttpExchange exchange, String body) throws IOException {
         try {
-            Optional<Integer> idOpt = getIdOpt(exchange);
-            if (idOpt.isEmpty()) {
-                sendBadRequest(exchange, "Некорректный id эпика");
-                return;
+            int id = getValidId(exchange);
+            if (id != -1) {
+                Epic epic = gson.fromJson(body, Epic.class);
+                taskManager.updateEpic(epic);
+                sendCreated(exchange);
             }
-            Epic epic = gson.fromJson(body, Epic.class);
-            taskManager.updateEpic(epic);
-            sendCreated(exchange);
         } catch (JsonSyntaxException e) {
-            sendBadRequest(exchange, "Переданные данные не соответствуют Epic.class");
+            sendBadRequest(exchange, "Переданные данные невалидны для создания эпика");
         } catch (NotFoundException e) {
             sendNotFound(exchange, e.getMessage());
         } catch (UpdateEpicTimeException | ManagerSaveException e) {
@@ -113,29 +102,16 @@ public class EpicHandler extends BaseHttpHandler implements HttpHandler {
 
     private void handleDeleteEpicById(HttpExchange exchange) throws IOException {
         try {
-            Optional<Integer> idOpt = getIdOpt(exchange);
-            if (idOpt.isEmpty()) {
-                sendBadRequest(exchange, "Некорректный id эпика");
-                return;
+            int id = getValidId(exchange);
+            if (id != -1) {
+                taskManager.removeEpic(id);
+                sendOK(exchange);
             }
-            taskManager.removeEpic(idOpt.get());
-            sendOK(exchange);
         } catch (NotFoundException e) {
             sendNotFound(exchange, e.getMessage());
         } catch (ManagerSaveException e) {
             sendError(exchange, e.getMessage());
         }
-    }
-
-    private Optional<Integer> getIdOpt(HttpExchange exchange) {
-        String[] path = exchange.getRequestURI().getPath().split("/");
-        Optional<Integer> id;
-        try {
-            id = Optional.of(Integer.parseInt(path[2]));
-        } catch (NumberFormatException e) {
-            return Optional.empty();
-        }
-        return id;
     }
 
     private Endpoint getEndpoint(String requestPath, String requestMethod) {

@@ -30,21 +30,17 @@ public class Task {
 
     public static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yy HH:mm");
 
-    public Task(int id, String taskName, String taskDescription, TaskStatus status, String startTime, long duration) {
+    public Task(int id, String taskName, String taskDescription, TaskStatus status, String startTime, Integer duration) {
         this.id = id;
-        this.taskName = taskName;
-        this.taskDescription = taskDescription;
-        this.status = status;
-        this.startTime = LocalDateTime.parse(startTime, DATE_TIME_FORMATTER);
-        this.duration = Duration.ofMinutes(duration);
+        this.taskName = (taskName != null) ? taskName : "";
+        this.taskDescription = (taskDescription != null) ? taskDescription : "";
+        this.status = (status != null) ? status : TaskStatus.NEW;
+        this.startTime = (startTime != null) ? LocalDateTime.parse(startTime, DATE_TIME_FORMATTER) : LocalDateTime.now();
+        this.duration = (duration != null) ? Duration.ofMinutes(duration) : Duration.ofMinutes(0);
     }
 
-    public Task(String taskName, String taskDescription, TaskStatus status, String startTime, long duration) {
-        this.taskName = taskName;
-        this.taskDescription = taskDescription;
-        this.status = status;
-        this.duration = Duration.ofMinutes(duration);
-        this.startTime = LocalDateTime.parse(startTime, DATE_TIME_FORMATTER);
+    public Task(String taskName, String taskDescription, TaskStatus status, String startTime, Integer duration) {
+        this(0, taskName, taskDescription, status, startTime, duration);
     }
 
     public int getId() {

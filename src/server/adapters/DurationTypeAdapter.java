@@ -2,6 +2,7 @@ package server.adapters;
 
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
 
 import java.io.IOException;
@@ -15,6 +16,11 @@ public class DurationTypeAdapter extends TypeAdapter<Duration> {
 
     @Override
     public Duration read(JsonReader jsonReader) throws IOException {
-        return Duration.ofMinutes(jsonReader.nextInt());
+        if (jsonReader.peek() == JsonToken.NULL) {
+            jsonReader.skipValue();
+            return Duration.ofMinutes(0);
+        } else {
+            return Duration.ofMinutes(jsonReader.nextInt());
+        }
     }
 }

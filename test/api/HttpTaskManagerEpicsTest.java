@@ -109,7 +109,7 @@ public class HttpTaskManagerEpicsTest {
     }
 
     @Test
-    public void testGetTaskAllAndByIdWithSubtasks() throws IOException, InterruptedException {
+    public void testGetEpicAllAndByIdWithSubtasks() throws IOException, InterruptedException {
         URI epicUri = URI.create("http://localhost:8080/epics");
         URI epicWithId1 = URI.create("http://localhost:8080/epics/1");
         URI epicWithId6 = URI.create("http://localhost:8080/epics/6");

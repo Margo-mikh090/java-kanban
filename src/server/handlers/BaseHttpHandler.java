@@ -8,6 +8,7 @@ import server.adapters.DurationTypeAdapter;
 import server.adapters.LocalDateTimeTypeAdapter;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -24,10 +25,11 @@ public class BaseHttpHandler {
     }
 
     protected void sendText(HttpExchange exchange, String message, int code) throws IOException {
-        exchange.getResponseHeaders().add("Content-Type", "text/plain");
-        exchange.sendResponseHeaders(code, 0);
-        exchange.getResponseBody().write(message.getBytes(StandardCharsets.UTF_8));
-        exchange.close();
+        try (OutputStream os = exchange.getResponseBody()) {
+            exchange.getResponseHeaders().add("Content-Type", "text/plain");
+            exchange.sendResponseHeaders(code, 0);
+            os.write(message.getBytes(StandardCharsets.UTF_8));
+        }
     }
 
     protected void sendCreated(HttpExchange exchange) throws IOException {
@@ -57,9 +59,21 @@ public class BaseHttpHandler {
     }
 
     protected void sendJson(HttpExchange exchange, String json) throws IOException {
-        exchange.getResponseHeaders().add("Content-Type", "application/json;charset=utf-8");
-        exchange.sendResponseHeaders(200, 0);
-        exchange.getResponseBody().write(json.getBytes(StandardCharsets.UTF_8));
-        exchange.close();
+        try (OutputStream os = exchange.getResponseBody()) {
+            exchange.getResponseHeaders().add("Content-Type", "application/json;charset=utf-8");
+            exchange.sendResponseHeaders(200, 0);
+            os.write(json.getBytes(StandardCharsets.UTF_8));
+        }
+    }
+
+    protected int getValidId(HttpExchange exchange) throws IOException {
+        String[] path = exchange.getRequestURI().getPath().split("/");
+        int id = -1;
+        try {
+            id = Integer.parseInt(path[2]);
+        } catch (NumberFormatException e) {
+            sendBadRequest(exchange, "Некорректный id");
+        }
+        return id;
     }
 }

@@ -13,7 +13,6 @@ import tasks.Subtask;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Optional;
 import java.util.regex.Pattern;
 
 public class SubtaskHandler extends BaseHttpHandler implements HttpHandler {
@@ -47,12 +46,8 @@ public class SubtaskHandler extends BaseHttpHandler implements HttpHandler {
 
     private void handleGetSubtaskById(HttpExchange exchange) throws IOException {
         try {
-            Optional<Integer> idOpt = getIdOpt(exchange);
-            if (idOpt.isEmpty()) {
-                sendBadRequest(exchange, "Некорректный id подзадачи");
-                return;
-            }
-            sendJson(exchange, gson.toJson(taskManager.getSubtask(idOpt.get())));
+            int id = getValidId(exchange);
+            if (id != -1) sendJson(exchange, gson.toJson(taskManager.getSubtask(id)));
         } catch (NotFoundException e) {
             sendNotFound(exchange, e.getMessage());
         }
@@ -64,7 +59,7 @@ public class SubtaskHandler extends BaseHttpHandler implements HttpHandler {
             taskManager.addSubtask(subtask);
             sendCreated(exchange);
         } catch (JsonSyntaxException e) {
-            sendBadRequest(exchange, "Переданные данные не соответствуют Subtask.class");
+            sendBadRequest(exchange, "Переданные данные невалидны для создания подзадачи");
         } catch (TimeIntersectionException e) {
             sendHasInteractions(exchange, e.getMessage());
         } catch (UpdateEpicTimeException | ManagerSaveException e) {
@@ -74,16 +69,14 @@ public class SubtaskHandler extends BaseHttpHandler implements HttpHandler {
 
     private void handleUpdateSubtask(HttpExchange exchange, String body) throws IOException {
         try {
-            Optional<Integer> idOpt = getIdOpt(exchange);
-            if (idOpt.isEmpty()) {
-                sendBadRequest(exchange, "Некорректный id подзадачи");
-                return;
+            int id = getValidId(exchange);
+            if (id != -1) {
+                Subtask subtask = gson.fromJson(body, Subtask.class);
+                taskManager.updateSubtask(subtask);
+                sendCreated(exchange);
             }
-            Subtask subtask = gson.fromJson(body, Subtask.class);
-            taskManager.updateSubtask(subtask);
-            sendCreated(exchange);
         } catch (JsonSyntaxException e) {
-            sendBadRequest(exchange, "Переданные данные не соответствуют Subtask.class");
+            sendBadRequest(exchange, "Переданные данные невалидны для создания подзадачи");
         } catch (NotFoundException e) {
             sendNotFound(exchange, e.getMessage());
         } catch (TimeIntersectionException e) {
@@ -104,29 +97,16 @@ public class SubtaskHandler extends BaseHttpHandler implements HttpHandler {
 
     private void handleDeleteSubtaskById(HttpExchange exchange) throws IOException {
         try {
-            Optional<Integer> idOpt = getIdOpt(exchange);
-            if (idOpt.isEmpty()) {
-                sendBadRequest(exchange, "Некорректный id задачи");
-                return;
+            int id = getValidId(exchange);
+            if (id != -1) {
+                taskManager.removeSubtask(id);
+                sendOK(exchange);
             }
-            taskManager.removeSubtask(idOpt.get());
-            sendOK(exchange);
         } catch (NotFoundException e) {
             sendNotFound(exchange, e.getMessage());
         } catch (UpdateEpicTimeException | ManagerSaveException e) {
             sendError(exchange, e.getMessage());
         }
-    }
-
-    private Optional<Integer> getIdOpt(HttpExchange exchange) {
-        String[] path = exchange.getRequestURI().getPath().split("/");
-        Optional<Integer> id;
-        try {
-            id = Optional.of(Integer.parseInt(path[2]));
-        } catch (NumberFormatException e) {
-            return Optional.empty();
-        }
-        return id;
     }
 
     private Endpoint getEndpoint(String requestPath, String requestMethod) {

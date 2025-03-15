@@ -26,7 +26,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         String[] taskData = value.split(",");
         TaskType taskType = TaskType.valueOf(taskData[1]);
         int id = Integer.parseInt(taskData[0]);
-        long duration = Long.parseLong(taskData[5]);
+        Integer duration = Integer.parseInt(taskData[5]);
         String startTime = taskData[6];
 
         return switch (taskType) {

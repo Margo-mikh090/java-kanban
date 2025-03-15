@@ -12,7 +12,6 @@ import tasks.Task;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Optional;
 import java.util.regex.Pattern;
 
 public class TaskHandler extends BaseHttpHandler implements HttpHandler {
@@ -46,12 +45,8 @@ public class TaskHandler extends BaseHttpHandler implements HttpHandler {
 
     private void handleGetTaskById(HttpExchange exchange) throws IOException {
         try {
-            Optional<Integer> idOpt = getIdOpt(exchange);
-            if (idOpt.isEmpty()) {
-                sendBadRequest(exchange, "Некорректный id задачи");
-                return;
-            }
-            sendJson(exchange, gson.toJson(taskManager.getTask(idOpt.get())));
+            int id = getValidId(exchange);
+            if (id != -1) sendJson(exchange, gson.toJson(taskManager.getTask(id)));
         } catch (NotFoundException e) {
             sendNotFound(exchange, e.getMessage());
         }
@@ -63,7 +58,7 @@ public class TaskHandler extends BaseHttpHandler implements HttpHandler {
             taskManager.addTask(task);
             sendCreated(exchange);
         } catch (JsonSyntaxException e) {
-            sendBadRequest(exchange, "Переданные данные не соответствуют Task.class");
+            sendBadRequest(exchange, "Переданные данные невалидны для создания задачи");
         } catch (TimeIntersectionException e) {
             sendHasInteractions(exchange, e.getMessage());
         } catch (ManagerSaveException e) {
@@ -73,16 +68,14 @@ public class TaskHandler extends BaseHttpHandler implements HttpHandler {
 
     private void handleUpdateTask(HttpExchange exchange, String body) throws IOException {
         try {
-            Optional<Integer> idOpt = getIdOpt(exchange);
-            if (idOpt.isEmpty()) {
-                sendBadRequest(exchange, "Некорректный id задачи");
-                return;
+            int id = getValidId(exchange);
+            if (id != -1) {
+                Task task = gson.fromJson(body, Task.class);
+                taskManager.updateTask(task);
+                sendCreated(exchange);
             }
-            Task task = gson.fromJson(body, Task.class);
-            taskManager.updateTask(task);
-            sendCreated(exchange);
         } catch (JsonSyntaxException e) {
-            sendBadRequest(exchange, "Переданные данные не соответствуют Task.class");
+            sendBadRequest(exchange, "Переданные данные невалидны для создания задачи");
         } catch (NotFoundException e) {
             sendNotFound(exchange, e.getMessage());
         } catch (TimeIntersectionException e) {
@@ -103,29 +96,16 @@ public class TaskHandler extends BaseHttpHandler implements HttpHandler {
 
     private void handleDeleteTaskById(HttpExchange exchange) throws IOException {
         try {
-            Optional<Integer> idOpt = getIdOpt(exchange);
-            if (idOpt.isEmpty()) {
-                sendBadRequest(exchange, "Некорректный id задачи");
-                return;
+            int id = getValidId(exchange);
+            if (id != -1) {
+                taskManager.removeTask(id);
+                sendOK(exchange);
             }
-            taskManager.removeTask(idOpt.get());
-            sendOK(exchange);
         } catch (NotFoundException e) {
             sendNotFound(exchange, e.getMessage());
         } catch (ManagerSaveException e) {
             sendError(exchange, e.getMessage());
         }
-    }
-
-    private Optional<Integer> getIdOpt(HttpExchange exchange) {
-        String[] path = exchange.getRequestURI().getPath().split("/");
-        Optional<Integer> id;
-        try {
-            id = Optional.of(Integer.parseInt(path[2]));
-        } catch (NumberFormatException e) {
-            return Optional.empty();
-        }
-        return id;
     }
 
     private Endpoint getEndpoint(String requestPath, String requestMethod) {

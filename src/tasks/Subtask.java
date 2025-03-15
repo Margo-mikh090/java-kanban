@@ -9,18 +9,18 @@ public class Subtask extends Task {
     @Expose
     private int epicID;
 
-    public Subtask(int id, String taskName, String taskDescription, TaskStatus status, int epicID, String startTime, long duration) {
+    public Subtask(int id, String taskName, String taskDescription, TaskStatus status, int epicID, String startTime, Integer duration) {
         super(id, taskName, taskDescription, status, startTime, duration);
         this.epicID = epicID;
     }
 
-    public Subtask(String taskName, String taskDescription, TaskStatus status, int epicID, String startTime, long duration) {
+    public Subtask(String taskName, String taskDescription, TaskStatus status, int epicID, String startTime, Integer duration) {
         super(taskName, taskDescription, status, startTime, duration);
         this.epicID = epicID;
     }
 
     //Конструктор для теста сабтаска
-    public Subtask(int id, String taskName, String taskDescription, TaskStatus status, String startTime, long duration) {
+    public Subtask(int id, String taskName, String taskDescription, TaskStatus status, String startTime, Integer duration) {
         super(id, taskName, taskDescription, status, startTime, duration);
     }
 
