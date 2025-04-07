@@ -26,7 +26,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         String[] taskData = value.split(",");
         TaskType taskType = TaskType.valueOf(taskData[1]);
         int id = Integer.parseInt(taskData[0]);
-        long duration = Long.parseLong(taskData[5]);
+        Integer duration = Integer.parseInt(taskData[5]);
         String startTime = taskData[6];
 
         return switch (taskType) {
@@ -48,9 +48,17 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 Task task = fromString(line);
 
                 switch (task.getType()) {
-                    case TASK -> tasks.put(task.getId(), task);
-                    case EPIC -> epics.put(task.getId(), (Epic) task);
-                    case SUBTASK -> subtasks.put(task.getId(), (Subtask) task);
+                    case TASK:
+                        tasks.put(task.getId(), task);
+                        prioritizedTasks.add(task);
+                        break;
+                    case EPIC:
+                        epics.put(task.getId(), (Epic) task);
+                        break;
+                    case SUBTASK:
+                        subtasks.put(task.getId(), (Subtask) task);
+                        prioritizedTasks.add(task);
+                        break;
                 }
             }
         } catch (IOException e) {

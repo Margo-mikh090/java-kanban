@@ -1,5 +1,6 @@
 package tasks;
 
+import com.google.gson.annotations.Expose;
 import enums.TaskStatus;
 import enums.TaskType;
 
@@ -8,29 +9,38 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class Task {
-    private int id;
-    private final String taskName;
-    private final String taskDescription;
-    private TaskStatus status;
-    private Duration duration;
-    private LocalDateTime startTime;
-    protected final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yy HH:mm");
 
-    public Task(int id, String taskName, String taskDescription, TaskStatus status, String startTime, long duration) {
+    @Expose
+    private int id;
+
+    @Expose
+    private final String taskName;
+
+    @Expose
+    private final String taskDescription;
+
+    @Expose
+    private TaskStatus status;
+
+    @Expose
+    private Duration duration;
+
+    @Expose
+    private LocalDateTime startTime;
+
+    public static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yy HH:mm");
+
+    public Task(int id, String taskName, String taskDescription, TaskStatus status, String startTime, Integer duration) {
         this.id = id;
-        this.taskName = taskName;
-        this.taskDescription = taskDescription;
-        this.status = status;
-        this.startTime = LocalDateTime.parse(startTime, formatter);
-        this.duration = Duration.ofMinutes(duration);
+        this.taskName = (taskName != null) ? taskName : "";
+        this.taskDescription = (taskDescription != null) ? taskDescription : "";
+        this.status = (status != null) ? status : TaskStatus.NEW;
+        this.startTime = (startTime != null) ? LocalDateTime.parse(startTime, DATE_TIME_FORMATTER) : LocalDateTime.now();
+        this.duration = (duration != null) ? Duration.ofMinutes(duration) : Duration.ofMinutes(0);
     }
 
-    public Task(String taskName, String taskDescription, TaskStatus status, String startTime, long duration) {
-        this.taskName = taskName;
-        this.taskDescription = taskDescription;
-        this.status = status;
-        this.duration = Duration.ofMinutes(duration);
-        this.startTime = LocalDateTime.parse(startTime, formatter);
+    public Task(String taskName, String taskDescription, TaskStatus status, String startTime, Integer duration) {
+        this(0, taskName, taskDescription, status, startTime, duration);
     }
 
     public int getId() {
@@ -102,8 +112,8 @@ public class Task {
                 + getStatus() + ","
                 + getTaskDescription() + ","
                 + getDuration().toMinutes() + ","
-                + getStartTime().format(formatter) + ","
-                + getEndTime().format(formatter);
+                + getStartTime().format(DATE_TIME_FORMATTER) + ","
+                + getEndTime().format(DATE_TIME_FORMATTER);
     }
 }
 

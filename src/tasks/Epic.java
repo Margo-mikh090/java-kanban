@@ -7,20 +7,25 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Epic extends Task {
+
     private List<Integer> subtaskIDs = new ArrayList<>();
 
     public Epic(int id, String taskName, String taskDescription, List<Integer> subtaskIDs) {
-        super(id, taskName, taskDescription, TaskStatus.IN_PROGRESS, "01.01.00 00:00", 60);
+        super(id, taskName, taskDescription, TaskStatus.IN_PROGRESS, null, null);
         this.subtaskIDs = subtaskIDs;
     }
 
     public Epic(String taskName, String taskDescription) {
-        super(taskName, taskDescription, TaskStatus.IN_PROGRESS, "01.01.00 00:00", 60);
+        super(taskName, taskDescription, TaskStatus.IN_PROGRESS, null, null);
+    }
+
+    public Epic(int id, String taskName, String taskDescription) {
+        super(id, taskName, taskDescription, TaskStatus.IN_PROGRESS, null, null);
     }
 
     //Конструктор для теста эпика
     public Epic(int id, String taskName, String taskDescription, TaskStatus status) {
-        super(id, taskName, taskDescription, status, "01.01.00 00:00", 60);
+        super(id, taskName, taskDescription, status, null, null);
     }
 
     public void removeSubtask(int id) {
